@@ -10,6 +10,7 @@
             position: relative;
             border: 1px solid #ccc;
             padding: 15px;
+            margin-bottom: 10px;
             text-align: center;
             cursor: pointer;
             transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
@@ -31,17 +32,21 @@
         }
         .card-delete {
             position: absolute;
-            top: 10px;
-            right: 10px;
+            top: 0;
+            right: 0;
             background-color: rgba(255, 255, 255, 0.7);
             border: none;
             cursor: pointer;
-            border-radius: 50%;
+            border-radius: 0 10px 0 10px;
+            font-size: 16px;
         }
         .export-import-buttons {
             display: flex;
             justify-content: flex-end;
             margin-bottom: 10px;
+        }
+        .export-import-buttons input {
+            margin-left: 10px;
         }
     </style>
     <script>
@@ -66,7 +71,10 @@
 
         function addCardToDOM(prompt, index) {
             var container = document.getElementById("card-container");
-            var newCard = '<div class="card"><button class="card-delete" onclick="deletePrompt(' + index + ')">X</button><p onclick="copyToClipboard(\'' + prompt + '\')">' + prompt + '</p></div>';
+            var newCard = `<div class="card">
+                <button class="card-delete" onclick="deletePrompt(${index})">X</button>
+                <p onclick="copyToClipboard('${prompt}')">${prompt}</p>
+            </div>`;
             container.innerHTML += newCard;
         }
 
@@ -120,7 +128,7 @@
     <main class="container">
         <div class="export-import-buttons">
             <button onclick="exportPrompts()">导出提示词</button>
-            <input type="file" onchange="importPrompts(event)">
+            <input type="file" onchange="importPrompts(event)" style="border: 1px solid #ccc; padding: 5px 10px;">
         </div>
         <div class="grid">
             <section>
