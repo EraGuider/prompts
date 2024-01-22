@@ -6,31 +6,31 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css">
     <title>提示词卡片集</title>
     <style>
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 10px;
-        }
         .card {
             border: 1px solid #ccc;
             padding: 15px;
             text-align: center;
             cursor: pointer;
             transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
-            border-radius: 8px;
-            background: #fff;
+            border-radius: 10px;
             box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
-        .card:hover {
-            transform: scale(1.05);
+        .card-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 10px;
         }
         @media (max-width: 600px) {
-            .grid {
+            .card-container {
                 grid-template-columns: 1fr;
             }
         }
     </style>
     <script>
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text);
+        }
+
         function submitPrompt() {
             var prompt = document.getElementById("new-prompt").value;
             if (!prompt) return;
@@ -53,9 +53,11 @@
         }
 
         function exportPrompts() {
-            // 生成表格并导出
             var prompts = JSON.parse(localStorage.getItem("prompts") || "[]");
-            var csvContent = "data:text/csv;charset=utf-8,提示词\n" + prompts.map(p => `"${p}"`).join("\n");
+            var csvContent = "data:text/csv;charset=utf-8,";
+            prompts.forEach(function(prompt, index){
+                csvContent += index < prompts.length ? prompt + "\n" : prompt;
+            }); 
             var encodedUri = encodeURI(csvContent);
             var link = document.createElement("a");
             link.setAttribute("href", encodedUri);
@@ -67,13 +69,13 @@
 
         function importPrompts(event) {
             var file = event.target.files[0];
-            if (!file) return;
             var reader = new FileReader();
             reader.onload = function(e) {
-                var prompts = e.target.result.split('\n').map(p => p.trim()).filter(p => p);
+                var prompts = e.target.result.split("\n").filter(function(prompt){
+                    return prompt.trim() !== "";
+                });
                 localStorage.setItem("prompts", JSON.stringify(prompts));
-                document.getElementById("card-container").innerHTML = '';
-                loadPrompts();
+                location.reload();
             };
             reader.readAsText(file);
         }
@@ -85,7 +87,7 @@
     <main class="container">
         <div class="grid">
             <section>
-                <div id="card-container">
+                <div id="card-container" class="card-container">
                     <!-- 提示词卡片将在这里显示 -->
                 </div>
                 <div>
@@ -94,13 +96,13 @@
                 </div>
                 <div>
                     <button onclick="exportPrompts()">导出提示词</button>
-                    <input type="file" id="import-file" onchange="importPrompts(event)">
+                    <input type="file" onchange="importPrompts(event)">
                 </div>
             </section>
         </div>
     </main>
     <footer class="container">
-        <small>© 2024 提示词卡片集</small>
+        <small>&copy; 2024 提示词卡片集</small>
     </footer>
 </body>
 </html>
