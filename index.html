@@ -14,6 +14,7 @@
             transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
             border-radius: 10px;
             box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            position: relative;
         }
         .card-container {
             display: grid;
@@ -24,6 +25,27 @@
             .card-container {
                 grid-template-columns: 1fr;
             }
+        }
+        .delete-button {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            border: none;
+            background: red;
+            color: white;
+            border-radius: 50%;
+            padding: 2px 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .control-panel {
+            text-align: right;
+            padding: 10px 0;
+        }
+        .control-button {
+            font-size: 0.8em;
+            padding: 5px 10px;
+            margin-left: 5px;
         }
     </style>
     <script>
@@ -38,7 +60,7 @@
             prompts.push(prompt);
             localStorage.setItem("prompts", JSON.stringify(prompts));
             addCardToDOM(prompt);
-            document.getElementById("new-prompt").value = ""; // 清空输入框
+            document.getElementById("new-prompt").value = "";
         }
 
         function loadPrompts() {
@@ -48,8 +70,17 @@
 
         function addCardToDOM(prompt) {
             var container = document.getElementById("card-container");
-            var newCard = '<div onclick="copyToClipboard(\'' + prompt + '\')" class="card"><p>' + prompt + '</p></div>';
+            var newCard = '<div class="card"><p>' + prompt + '</p><button class="delete-button" onclick="deletePrompt(this, \'' + prompt + '\')">×</button></div>';
             container.innerHTML += newCard;
+        }
+
+        function deletePrompt(btn, prompt) {
+            var prompts = JSON.parse(localStorage.getItem("prompts") || "[]");
+            var filtered = prompts.filter(function(p) {
+                return p !== prompt;
+            });
+            localStorage.setItem("prompts", JSON.stringify(filtered));
+            btn.parentNode.remove();
         }
 
         function exportPrompts() {
@@ -85,6 +116,10 @@
 </head>
 <body>
     <main class="container">
+        <div class="control-panel">
+            <button class="control-button" onclick="exportPrompts()">导出</button>
+            <input class="control-button" type="file" onchange="importPrompts(event)">
+        </div>
         <div class="grid">
             <section>
                 <div id="card-container" class="card-container">
@@ -92,11 +127,7 @@
                 </div>
                 <div>
                     <input type="text" id="new-prompt" placeholder="输入新的提示词" aria-label="新的提示词">
-                    <button onclick="submitPrompt()">提交提示词</button>
-                </div>
-                <div>
-                    <button onclick="exportPrompts()">导出提示词</button>
-                    <input type="file" onchange="importPrompts(event)">
+                    <button onclick="submitPrompt()">提交</button>
                 </div>
             </section>
         </div>
