@@ -7,6 +7,7 @@
     <title>提示词卡片集</title>
     <style>
         .card {
+            position: relative;
             border: 1px solid #ccc;
             padding: 15px;
             text-align: center;
@@ -14,6 +15,9 @@
             transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
             border-radius: 10px;
             box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .card:hover {
+            transform: scale(1.05);
         }
         .card-container {
             display: grid;
@@ -25,6 +29,20 @@
                 grid-template-columns: 1fr;
             }
         }
+        .card-delete {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: rgba(255, 255, 255, 0.7);
+            border: none;
+            cursor: pointer;
+            border-radius: 50%;
+        }
+        .export-import-buttons {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 10px;
+        }
     </style>
     <script>
         function copyToClipboard(text) {
@@ -34,26 +52,26 @@
         function submitPrompt() {
             var prompt = document.getElementById("new-prompt").value;
             if (!prompt) return;
-            var prompts = JSON.parse(localStorage.getItem("prompts") || "[]");
+            var prompts = getPrompts();
             prompts.push(prompt);
-            localStorage.setItem("prompts", JSON.stringify(prompts));
-            addCardToDOM(prompt);
-            document.getElementById("new-prompt").value = ""; // 清空输入框
+            savePrompts(prompts);
+            addCardToDOM(prompt, prompts.length - 1);
+            document.getElementById("new-prompt").value = "";
         }
 
         function loadPrompts() {
-            var prompts = JSON.parse(localStorage.getItem("prompts") || "[]");
-            prompts.forEach(prompt => addCardToDOM(prompt));
+            var prompts = getPrompts();
+            prompts.forEach((prompt, index) => addCardToDOM(prompt, index));
         }
 
-        function addCardToDOM(prompt) {
+        function addCardToDOM(prompt, index) {
             var container = document.getElementById("card-container");
-            var newCard = '<div onclick="copyToClipboard(\'' + prompt + '\')" class="card"><p>' + prompt + '</p></div>';
+            var newCard = '<div class="card"><button class="card-delete" onclick="deletePrompt(' + index + ')">X</button><p onclick="copyToClipboard(\'' + prompt + '\')">' + prompt + '</p></div>';
             container.innerHTML += newCard;
         }
 
         function exportPrompts() {
-            var prompts = JSON.parse(localStorage.getItem("prompts") || "[]");
+            var prompts = getPrompts();
             var csvContent = "data:text/csv;charset=utf-8,";
             prompts.forEach(function(prompt, index){
                 csvContent += index < prompts.length ? prompt + "\n" : prompt;
@@ -74,10 +92,25 @@
                 var prompts = e.target.result.split("\n").filter(function(prompt){
                     return prompt.trim() !== "";
                 });
-                localStorage.setItem("prompts", JSON.stringify(prompts));
+                savePrompts(prompts);
                 location.reload();
             };
             reader.readAsText(file);
+        }
+
+        function deletePrompt(index) {
+            var prompts = getPrompts();
+            prompts.splice(index, 1);
+            savePrompts(prompts);
+            location.reload();
+        }
+
+        function getPrompts() {
+            return JSON.parse(localStorage.getItem("prompts") || "[]");
+        }
+
+        function savePrompts(prompts) {
+            localStorage.setItem("prompts", JSON.stringify(prompts));
         }
 
         window.onload = loadPrompts;
@@ -85,6 +118,10 @@
 </head>
 <body>
     <main class="container">
+        <div class="export-import-buttons">
+            <button onclick="exportPrompts()">导出提示词</button>
+            <input type="file" onchange="importPrompts(event)">
+        </div>
         <div class="grid">
             <section>
                 <div id="card-container" class="card-container">
@@ -93,10 +130,6 @@
                 <div>
                     <input type="text" id="new-prompt" placeholder="输入新的提示词" aria-label="新的提示词">
                     <button onclick="submitPrompt()">提交提示词</button>
-                </div>
-                <div>
-                    <button onclick="exportPrompts()">导出提示词</button>
-                    <input type="file" onchange="importPrompts(event)">
                 </div>
             </section>
         </div>
