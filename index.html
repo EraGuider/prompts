@@ -9,110 +9,86 @@
             margin: 0;
             font-family: 'Arial', sans-serif;
             background-color: #f0f0f0;
-            padding-top: 60px; /* 为顶部控制栏留出空间 */
         }
-        .control-panel {
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 60px 20px 20px; /* 上边距足够给固定顶部栏留空间 */
+        }
+        .card-container {
             display: flex;
-            justify-content: flex-end;
-            padding: 10px 20px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .card {
+            background-color: #ffffff;
+            border: none;
+            padding: 16px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            transition: box-shadow 0.2s ease;
+            cursor: pointer;
+            flex: 1 0 210px; /* 基于最小宽度210px来伸缩 */
+        }
+        .card:hover {
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        .card p {
+            margin: 0;
+        }
+        .card input {
+            display: none;
+        }
+        /* 简化顶部栏样式 */
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             position: fixed;
             top: 0;
             width: 100%;
             background-color: #fff;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            z-index: 1000;
-        }
-        .card-container {
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-            margin: 0 auto;
-            max-width: 1200px;
-            padding: 0 10px;
-        }
-        .card {
-            background-color: #ffffff;
-            border-radius: 4px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-            margin: 10px;
-            position: relative;
-            width: 250px; /* 卡片宽度 */
-            padding: 20px; /* 内边距 */
+            padding: 10px 20px;
             box-sizing: border-box;
+            z-index: 10;
         }
-        .card:hover .close-btn {
-            display: block;
+        /* 输入框与按钮的简洁风格 */
+        .input-group {
+            display: flex;
+            margin-bottom: 20px;
         }
-        .close-btn {
-            display: none; /* 默认不显示，鼠标悬停时显示 */
-            position: absolute;
-            top: 0;
-            right: 0;
-            padding: 8px;
-            cursor: pointer;
-            background: none;
-            border: none;
-            font-size: 24px;
-            color: #888;
-        }
-        .close-btn:hover {
-            color: #333;
+        #new-prompt {
+            flex-grow: 1;
+            margin-right: 10px;
         }
         @media (max-width: 768px) {
             .card {
-                width: calc(50% - 20px); /* 调整为一行两张卡片 */
-            }
-        }
-        @media (max-width: 480px) {
-            .card {
-                width: 100%; /* 调整为一行一张卡片 */
+                flex: 1 0 100%;
             }
         }
     </style>
 </head>
 <body>
-    <div class="control-panel">
-        <button onclick="exportPrompts()">导出</button>
+    <div class="top-bar">
+        <button onclick="exportPrompts()">导出提示词</button>
         <input type="file" onchange="importPrompts(event)">
     </div>
-    <div class="card-container">
-        <!-- 卡片内容将由JavaScript动态生成 -->
-    </div>
+    <main class="container">
+        <div class="input-group">
+            <input type="text" id="new-prompt" placeholder="输入新的提示词" aria-label="输入新的提示词">
+            <button onclick="submitPrompt()">添加</button>
+        </div>
+        <div id="card-container" class="card-container">
+            <!-- 提示词卡片将在这里显示 -->
+        </div>
+    </main>
+    <footer class="container">
+        <small>&copy; 2024 提示词卡片集</small>
+    </footer>
     <script>
-        function loadPrompts() {
-            var prompts = JSON.parse(localStorage.getItem('prompts') || '[]');
-            prompts.forEach(function(prompt) {
-                addCardToDOM(prompt);
-            });
-        }
-
-        function addCardToDOM(prompt) {
-            var container = document.querySelector('.card-container');
-            var card = document.createElement('div');
-            card.className = 'card';
-            card.innerHTML = '<p>' + prompt + '</p><button class="close-btn" onclick="removeCard(this, \'' + prompt + '\')">&times;</button>';
-            container.appendChild(card);
-        }
-
-        function removeCard(button, prompt) {
-            var card = button.parentElement;
-            card.remove();
-            var prompts = JSON.parse(localStorage.getItem('prompts') || '[]');
-            prompts = prompts.filter(function(p) {
-                return p !== prompt;
-            });
-            localStorage.setItem('prompts', JSON.stringify(prompts));
-        }
-
-        function exportPrompts() {
-            // 导出提示词的功能
-        }
-
-        function importPrompts(event) {
-            // 导入提示词的功能
-        }
-
-        window.addEventListener('DOMContentLoaded', loadPrompts);
+        // 你的JavaScript代码，包括本地存储的处理逻辑
     </script>
 </body>
 </html>
